@@ -1,0 +1,43 @@
+name: APK Doctor AI - Compilar APK
+
+on:
+workflow_dispatch:
+
+permissions:
+contents: read
+
+jobs:
+build:
+name: Diagnosticar y compilar Android
+runs-on: ubuntu-latest
+
+steps:
+  - name: Descargar repositorio
+    uses: actions/checkout@v4
+
+  - name: Comprobar proyecto Android
+    run: |
+      if [ ! -f "gradlew" ]; then
+        echo "::error::No se encontró gradlew en la raíz."
+        echo "Este repositorio todavía necesita un proyecto Android."
+        echo "Añade el proyecto Android antes de intentar compilar."
+        exit 1
+      fi
+      chmod +x gradlew
+
+  - name: Preparar Java 17
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
+
+  - name: Compilar APK
+    run: ./gradlew assembleDebug --stacktrace
+
+  - name: Guardar APK generado
+    if: success()
+    uses: actions/upload-artifact@v4
+    with:
+      name: APK-Doctor-AI-debug
+      path: '**/build/outputs/apk/debug/*.apk'
+      if-no-files-found: error
