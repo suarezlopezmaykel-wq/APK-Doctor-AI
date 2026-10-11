@@ -1,6 +1,7 @@
 name: APK Doctor AI - Compilar APK
 
-on:workflow_dispatch:
+on:
+workflow_dispatch:
 
 permissions:
 contents: read
