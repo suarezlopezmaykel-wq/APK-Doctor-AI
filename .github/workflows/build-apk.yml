@@ -1,46 +1,46 @@
 name: APK Doctor AI - Compilar APK
 
 on:
-workflow_dispatch:
+  workflow_dispatch:
 
 permissions:
-contents: read
+  contents: read
 
 jobs:
-build:
-name: Diagnosticar y compilar Android
-runs-on: ubuntu-24.04
+  build:
+    name: Diagnosticar y compilar Android
+    runs-on: ubuntu-24.04
 
-steps:
-  - name: Descargar repositorio
-    uses: actions/checkout@v6
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v6
 
-  - name: Comprobar proyecto Android
-    run: |
-      for f in settings.gradle.kts build.gradle.kts gradle.properties app/build.gradle.kts app/src/main/AndroidManifest.xml app/src/main/java/com/apkdoctor/ai/MainActivity.kt; do
-        if [ ! -f "$f" ]; then
-          echo "::error::Falta el archivo $f"
-          exit 1
-        fi
-      done
+      - name: Comprobar proyecto Android
+        run: |
+          for f in settings.gradle.kts build.gradle.kts gradle.properties app/build.gradle.kts app/src/main/AndroidManifest.xml app/src/main/java/com/apkdoctor/ai/MainActivity.kt; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Falta el archivo $f"
+              exit 1
+            fi
+          done
 
-  - name: Preparar Java 17
-    uses: actions/setup-java@v5
-    with:
-      distribution: temurin
-      java-version: '17'
+      - name: Preparar Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
 
-  - name: Preparar Gradle 9.5.0
-    uses: gradle/actions/setup-gradle@v5
-    with:
-      gradle-version: '9.5.0'
+      - name: Preparar Gradle 9.5.0
+        uses: gradle/actions/setup-gradle@v5
+        with:
+          gradle-version: '9.5.0'
 
-  - name: Compilar APK de depuración
-    run: gradle assembleDebug --stacktrace
+      - name: Compilar APK de depuración
+        run: gradle assembleDebug --stacktrace
 
-  - name: Guardar APK generado
-    uses: actions/upload-artifact@v6
-    with:
-      name: APK-Doctor-AI-debug
-      path: app/build/outputs/apk/debug/*.apk
-      if-no-files-found: error
+      - name: Guardar APK generado
+        uses: actions/upload-artifact@v6
+        with:
+          name: APK-Doctor-AI-debug
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
