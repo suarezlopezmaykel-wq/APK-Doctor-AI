@@ -139,8 +139,9 @@
         const PARKING_Y = GOAL_Y - 1800;
 
         function getCurveOffset(y) {
-            const bend = Math.sin(y * 0.00028) * 420;
-            const secondary = Math.sin(y * 0.00012 + 2.4) * 130;
+            const dist = y - START_Y;
+            const bend = Math.sin(dist * 0.00028) * 420;
+            const secondary = Math.sin(dist * 0.00012) * 130;
             return bend + secondary;
         }
         function getTrackCenterAtY(y) { return ROAD_X + getCurveOffset(y); }

@@ -14,19 +14,21 @@
   1. *Falta de manejo de permisos en runtime (Android 13 / API 33):* En `AcceptThread` y `ConnectThread` (`MainActivity.java`), la ausencia del permiso `BLUETOOTH_CONNECT` podía causar excepciones o dejar los sockets inactivos sin notificar al usuario.
   2. *Deficiencia en mensajes de error en la UI:* En `index.html`, la función `window.onBluetoothStatus` no presentaba explicaciones claras ante estados `'FAILED'` o `'DISCONNECTED'`.
   3. *Incompatibilidad de la herramienta de construcción:* La versión original de Android Gradle Plugin (`8.1.4`) producía fallos de `jlink` al compilar bajo JDK 21.
+  4. *Desalineación inicial de la carretera respecto a los autos:* En `index.html`, la función `getCurveOffset(y)` sumaba un desplazamiento armónico no nulo en `START_Y`, dibujando la pista desplazada horizontalmente a la derecha mientras los autos aparecían sobre el césped fuera de la carretera durante la cuenta regresiva.
 
 ## 4. Ramas y Pull Requests Anteriores Examinados
 - **`origin/main`:** Contiene el commit `a328b61` (Merge de Pull Request #1) y las adiciones de `jules-agent.yml` (`b54db2a`, `c7788e9`).
 - **Pull Request #1:** PR fusionada previamente en `main` que integró las correcciones de curvas y la arquitectura de Sockets RFCOMM.
-- **Pull Request #2:** PR abierta desde la rama `jules-fix-turbo-racing-apk-bt-14075085924265135862` para integrar los ajustes de permisos, el flujo de compilación automatizado y la resolución de divergencias.
+- **Pull Request #2:** PR abierta desde la rama `jules-fix-turbo-racing-apk-bt-14075085924265135862` para integrar los ajustes de permisos, la corrección de geometría de la carretera en la línea de salida y el workflow de compilación automatizado.
 
 ## 5. Archivos Modificados y Explicación de Cada Cambio
 - **`app/src/main/java/com/carrera/bluetooth3d/MainActivity.java`**:
   - Se agregaron verificaciones explícitas de `Manifest.permission.BLUETOOTH_CONNECT` en `startServer()`, `connectToDevice(address)`, `AcceptThread` (constructor) y `ConnectThread` (`run()`).
   - Si falta el permiso, se solicita automáticamente al usuario mediante `requestBluetoothPermissions()`, se muestra un mensaje `Toast` e interrumpe la ejecución enviando la señal `"FAILED"` a JavaScript para no dejar sockets nulos colgados.
 - **`app/src/main/assets/index.html`**:
-  - Se actualizaron los mensajes en `window.onBluetoothStatus` para capturar los estados `'FAILED'` ("Fallo al establecer la conexión Bluetooth. Revisa los permisos y vuelve a intentarlo.") y `'DISCONNECTED'` ("Conexión perdida con el otro jugador. Puedes volver a unirte o crear sala.").
-  - Se conservó intacta la física de vehículos, el renderizado de la carretera con curvas compuestas (`getCurveOffset`, `drawSegment`), la IA (`updateAI`) y los controles.
+  - Se corrigió `getCurveOffset(y)` para calcular la curvatura como función relativa de la distancia a la línea de salida (`y - START_Y`), garantizando que la carretera esté exactamente centrada en `ROAD_X` en `y = START_Y`, de modo que los 4 vehículos aparezcan perfectamente colocados sobre los 4 carriles asfaltados durante la cuenta regresiva y el arranque.
+  - Se actualizaron los mensajes en `window.onBluetoothStatus` para capturar los estados `'FAILED'` y `'DISCONNECTED'`.
+  - Se conservó intacta la física de vehículos, bordes, colisiones, la IA (`updateAI`), la cámara y los controles.
 - **`build.gradle`**:
   - Se actualizó el plugin Android Gradle de `8.1.4` a `8.2.2` para garantizar compatibilidad total con Gradle 8.5 y JDK 21.
 - **`.github/workflows/build.yml`**:
@@ -36,6 +38,7 @@
 
 ## 6. Errores Corregidos y Aspectos Pendientes
 - **Corregidos:**
+  - Posicionamiento de la carretera en la salida adaptándose exactamente a las posiciones iniciales de los 4 vehículos sobre la pista.
   - Prevención de cierres imprevistos y bloqueos silenciosos por falta de permisos de Bluetooth en Android 13.
   - Mensajes de error claros e informativos en la interfaz HTML5 ante fallos de conexión.
   - Resolución del fallo de compilación de Gradle bajo JDK 21.
@@ -45,9 +48,9 @@
   - Pruebas físicas de rendimiento y transmisión RFCOMM en hardware real.
 
 ## 7. Pruebas Ejecutadas y Resultados Reales
-- **Compilación de Gradle:** `./gradlew assembleDebug` -> `BUILD SUCCESSFUL in 6s`.
-- **Pruebas de Integración/Unitarias:** `./gradlew test` -> `BUILD SUCCESSFUL in 3s`.
-- **Verificación Frontend/WebView:** Script de Playwright ejecutado correctamente generando captura de pantalla (`verification.png`) y video de la interfaz multijugador.
+- **Compilación de Gradle:** `./gradlew assembleDebug` -> `BUILD SUCCESSFUL in 2s`.
+- **Pruebas de Integración/Unitarias:** `./gradlew test` -> `BUILD SUCCESSFUL in 1s`.
+- **Verificación Frontend/WebView (Playwright):** Verificación visual efectuada confirmando la perfecta alineación de los 4 autos en los 4 carriles de la pista durante la cuenta regresiva inicial (captura `verification.png`).
 
 ## 8. Resultado de la Compilación del APK
 - **Estado:** Éxito.
@@ -83,6 +86,14 @@
 
 - **Sincronización:** Se incorporaron los archivos de automatización de `main` (`.github/workflows/jules-agent.yml`) a la rama de la PR #2.
 - **Resultado de Compilación y Pruebas:**
-  - `./gradlew assembleDebug` -> `BUILD SUCCESSFUL in 6s`.
-  - `./gradlew test` -> `BUILD SUCCESSFUL in 3s`.
+  - `./gradlew assembleDebug` -> `BUILD SUCCESSFUL in 2s`.
+  - `./gradlew test` -> `BUILD SUCCESSFUL in 1s`.
 - **Estado de Fusionabilidad:** PR #2 se encuentra unificada y lista para ser aprobada por el propietario en GitHub.
+
+---
+
+## 16. CORRECCIÓN DE POSICIONAMIENTO DE AUTOS EN SALIDA
+
+- **Diagnóstico:** El desfase entre la pista y los autos en el arranque se debía a que `getCurveOffset(y)` sumaba una constante no nula (+432.3px) en `y = START_Y`, dibujando la curva desplazada respecto al origen `ROAD_X`.
+- **Solución:** Se adaptó la geometría de la carretera haciendo que el offset dependa de `dist = y - START_Y`. De este modo, el centro de la carretera en la línea de salida es exactamente `ROAD_X`, envolviendo perfectamente a los 4 autos en sus 4 carriles sin desplazar los vehículos.
+- **Verificación Visual:** Captura realizada con Playwright confirmando que los autos están perfectamente alineados sobre los carriles dentro de la superficie asfaltada durante la cuenta regresiva.
