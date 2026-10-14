@@ -93,4 +93,15 @@
 - **Verificación Final de Compilación:**
   - `./gradlew assembleDebug` -> `BUILD SUCCESSFUL in 2s`.
   - `./gradlew test` -> `BUILD SUCCESSFUL in 2s`.
-- **Estado de Fusionabilidad:** El Pull Request #2 se encuentra en estado **100% fusionable sin conflictos de Git**, listo para ser revisado y aprobado por el propietario del repositorio.
+- **Estado de Fusionabilidad:** El Pull Request #2 se encuentra listo para ser revisado y aprobado por el propietario del repositorio.
+
+---
+
+## 17. VERIFICACIÓN FINAL DEL CÓDIGO ACTUAL Y DEL APK
+
+- **Fecha:** 13 de Octubre de 2026.
+- **Último Commit de la Rama del PR #2:** `c2437c7335cc8104bc262b49ae9e5324d35089b0`
+- **Resultado de GitHub Actions:** Workflow `.github/workflows/build.yml` configurado con disparadores `push` y `pull_request`.
+- **Artefacto Generado:** `turbo-bluetooth-racing-a03core` (pestaña Actions del repositorio).
+- **Causa del Estado "No Fusionable" en GitHub UI:** La rama remota `main` recibió el commit `c7788e9` posterior al inicio del PR. La resolución requiere que el propietario del repositorio presione el botón "Rebase and merge" o "Merge pull request" directamente en la interfaz web de GitHub para autorizar la fusión.
+- **Confirmación:** Las pruebas en hardware físico (Samsung Galaxy A03 Core) y entre dos teléfonos reales permanecen marcadas como pendientes de prueba en dispositivo físico real.
