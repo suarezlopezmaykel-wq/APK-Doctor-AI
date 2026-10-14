@@ -1,0 +1,28 @@
+name: Invoke Jules Manually
+
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: "Instrucciones para Jules"
+        required: true
+        type: string
+      starting_branch:
+        description: "Rama del repositorio"
+        required: true
+        default: "main"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  invoke-jules:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Invoke Jules
+        uses: google-labs-code/jules-action@v1.0.0
+        with:
+          prompt: ${{ inputs.prompt }}
+          starting_branch: ${{ inputs.starting_branch }}
+          jules_api_key: ${{ secrets.JULES_API_KEY }}
